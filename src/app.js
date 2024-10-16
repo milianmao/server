@@ -46,7 +46,7 @@ const config = require('./cli.js')
 	.parse(process.argv);
 
 global.address = config.address;
-config.port = (config.port || '8080:8081')
+config.port = (config.port || '6666:8081')
 	.split(':')
 	.map((string) => parseInt(string));
 const invalid = (value) => isNaN(value) || value < 1 || value > 65535;

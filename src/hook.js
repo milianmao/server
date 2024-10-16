@@ -99,6 +99,9 @@ hook.target.path = new Set([
 	'/api/usertool/sound/mobile/detail',
 	'/api/vipauth/app/auth/query',
 	'/api/music-vip-membership/client/vip/info',
+	'/api/search/pc/complex/page',
+	'/api/search/song/list/page',
+	'/api/song/enhance/player/url/v1'
 ]);
 
 const domainList = [
