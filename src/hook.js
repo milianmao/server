@@ -732,6 +732,9 @@ const tryMatch = (ctx) => {
 					item.size = song.size;
 					item.code = 200;
 					item.freeTrialInfo = null;
+					if (item.freeTrialPrivilege !== null){
+						item.freeTrialPrivilege.resConsumable = false
+					}
 					return song;
 				})
 				.then((song) => {
