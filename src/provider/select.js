@@ -6,16 +6,17 @@ module.exports = (list, info) => {
 		.slice(0, 20) // 挑前5个结果
 		.find(
 			(song) =>{
-				const timeResult = song.duration && Math.abs(song.duration - duration) <= 5 * 1e3;
-				let artistResult = false;
-				for(let i=0;i<artists.length;i++){
-					let result = song.artists[0].name.includes(artists[i].name)
-					if (result){
-						artistResult = true
-						break
-					}
-				}
-				return timeResult && artistResult
+				// const timeResult = song.duration && Math.abs(song.duration - duration) <= 5 * 1e3;
+				// let artistResult = false;
+				// for(let i=0;i<artists.length;i++){
+				// 	let result = song.artists[0].name.includes(artists[i].name)
+				// 	if (result){
+				// 		artistResult = true
+				// 		break
+				// 	}
+				// }
+				// return timeResult && artistResult
+				return true
 			}
 
 		); // 第一个时长相差5s (5000ms) 之内的结果

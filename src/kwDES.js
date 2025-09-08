@@ -581,5 +581,6 @@ const SECRET_KEY = Buffer.from('ylzsxkwm');
 const encrypt = (msg) => crypt(msg, SECRET_KEY, 0);
 const decrypt = (msg) => crypt(msg, SECRET_KEY, 1);
 const encryptQuery = (query) => encrypt(Buffer.from(query)).toString('base64');
-
-module.exports = { encrypt, decrypt, encryptQuery };
+// const decryptQuery = (query) => decrypt(Buffer.from(query)).toString('base64');
+const decryptQuery = (query) => decrypt(Buffer.from(query, 'base64')).toString();
+module.exports = { encrypt, decrypt, encryptQuery,decryptQuery};

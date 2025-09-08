@@ -10,7 +10,7 @@
 		"node": ">= 12"
 	},
 	"scripts": {
-		"start:dev": "cross-env LOG_LEVEL=debug ENABLE_LOCAL_VIP=svip node src/app.js -e https://music.163.com -o kuwo",
+		"start:dev": "cross-env LOG_LEVEL=debug ENABLE_LOCAL_VIP=svip NO_CACHE=true node src/app.js -e https://music.163.com -o kuwo",
 		"start": "cross-env ENABLE_FLAC=true LOG_LEVEL=debug JSON_LOG=true ENABLE_LOCAL_VIP=svip NO_CACHE=true DISABLE_UPGRADE_CHECK=true BLOCK_ADS=true node src/app.js -e https://music.163.com -o kuwo pyncmd kugou",
 		"build": "webpack",
 		"pkg": "pkg . --out-path=dist/",

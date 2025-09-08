@@ -116,6 +116,7 @@ const domainList = [
 
 hook.request.before = (ctx) => {
 	const { req } = ctx;
+
 	req.url =
 		(req.url.startsWith('http://')
 			? ''
@@ -127,6 +128,7 @@ hook.request.before = (ctx) => {
 					? req.headers.host
 					: null)) + req.url;
 	const url = parse(req.url);
+	console.log("--------->url路径：{}",url.path)
 	if (
 		[url.hostname, req.headers.host].some((host) =>
 			isHost(host, 'music.163.com')
@@ -341,7 +343,7 @@ hook.request.after = (ctx) => {
 				} else {
 					netease.jsonBody = JSON.parse(patch(buffer.toString()));
 				}
-
+				console.log("----------->request:{},body:{}",netease.path,netease.jsonBody)
 				if (ENABLE_LOCAL_VIP) {
 					const vipPath = '/api/music-vip-membership/client/vip/info';
 					if (
