@@ -45,6 +45,7 @@ hook.target.host = new Set([
 	'music.163.com',
 	'interface.music.163.com',
 	'interface3.music.163.com',
+	'interfacepc.music.163.com',
 	'apm.music.163.com',
 	'apm3.music.163.com',
 	'interface.music.163.com.163jiasu.com',
@@ -80,10 +81,14 @@ hook.target.path = new Set([
 	'/batch',
 	'/api/batch',
 	'/api/listen/together/privilege/get',
+	'/api/playmode/intelligence/list',
 	'/api/v1/search/get',
 	'/api/v1/search/song/get',
 	'/api/search/complex/get',
 	'/api/search/complex/page',
+	'/api/search/pc/complex/get',
+	'/api/search/pc/complex/page',
+	'/api/search/song/list/page',
 	'/api/search/song/page',
 	'/api/cloudsearch/pc',
 	'/api/v1/playlist/manipulate/tracks',
@@ -164,12 +169,14 @@ hook.request.before = (ctx) => {
 				if ('x-napm-retry' in req.headers)
 					delete req.headers['x-napm-retry'];
 				req.headers['X-Real-IP'] = '118.88.88.88';
+				if ('x-aeapi' in req.headers) req.headers['x-aeapi'] = 'false';
 				if (
 					req.url.includes('stream') ||
 					req.url.includes('/eapi/cloud/upload/check')
 				)
 					return; // look living/cloudupload eapi can not be decrypted
-				req.headers['Accept-Encoding'] = 'gzip, deflate'; // https://blog.csdn.net/u013022222/article/details/51707352
+				if (req.headers['Accept-Encoding'])
+					req.headers['Accept-Encoding'] = 'gzip, deflate'; // https://blog.csdn.net/u013022222/article/details/51707352
 				if (body) {
 					const netease = {};
 					netease.pad = (body.match(/%0+$/) || [''])[0];

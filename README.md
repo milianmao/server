@@ -10,10 +10,10 @@
 
 ## 特性
 
--   支援多个音源，替换变灰歌曲链接
-    -   支援的完整音源清单可以见下方〈音源清单〉处。
--   为请求增加 `X-Real-IP` 参数解锁海外限制，支持指定网易云服务器 IP，支持设置上游 HTTP / HTTPS 代理
--   完整的流量代理功能 (HTTP / HTTPS)，可直接作为系统代理 (同时支持 PAC)
+- 支援多个音源，替换变灰歌曲链接
+    - 支援的完整音源清单可以见下方〈音源清单〉处。
+- 为请求增加 `X-Real-IP` 参数解锁海外限制，支持指定网易云服务器 IP，支持设置上游 HTTP / HTTPS 代理
+- 完整的流量代理功能 (HTTP / HTTPS)，可直接作为系统代理 (同时支持 PAC)
 
 ## 运行
 
@@ -58,7 +58,7 @@ http 代理使用 `127.0.0.1`，端口默认使用 `8080`。
 
 #### Docker Hub
 
-见 [pan93412/unblock-netease-music-enhanced](https://hub.docker.com/repository/docker/pan93412/unblock-netease-music-enhanced)
+见 [pan93412/unblock-netease-music-enhanced](https://hub.docker.com/r/pan93412/unblock-netease-music-enhanced)
 。`latest` 是从 `enhanced` 组建的最新版本；`release` 是最新 tag 的版本。
 
 直接运行 `pan93412/unblock-netease-music-enhanced` 的命令如下：
@@ -82,7 +82,7 @@ docker run -e JSON_LOG=true -e LOG_LEVEL=debug pan93412/unblock-netease-music-en
 若要传入配置参数，只要在 `docker run` 的 image 之后传入参数即可：
 
 ```bash
-docker run pan93412/unblock-netease-music-enhanced -o bilibili -p 1234
+docker run pan93412/unblock-netease-music-enhanced -o kuwo -p 1234
 ```
 
 #### 自行编译
@@ -169,16 +169,18 @@ node app.js -o bilibili ytdlp
 | --------------------------- | ----------- | -------- | ------------------------------------------------------------------------------ |
 | QQ 音乐                     | `qq`        |          | 需要准备自己的 `QQ_COOKIE`（请参阅下方〈环境变量〉处）。必须使用 QQ 登录。     |
 | 酷狗音乐                    | `kugou`     | ✅       |                                                                                |
-| 酷我音乐                    | `kuwo`      | ✅       |                                                                                |
+| 酷我音乐                    | `kuwo`      |          |                                                                                |
+| 波点音乐                    | `bodian`    | ✅       |                                                                                |
 | 咪咕音乐                    | `migu`      | ✅       | 需要准备自己的 `MIGU_COOKIE`（请参阅下方〈环境变量〉处）。                     |
 | JOOX                        | `joox`      |          | 需要准备自己的 `JOOX_COOKIE`（请参阅下方〈环境变量〉处）。似乎有严格地区限制。 |
 | YouTube（纯 JS 解析方式）   | `youtube`   |          | 需要 Google 认定的**非中国大陆区域** IP 地址。                                 |
 | YouTube（通过 `youtube-dl`) | `youtubedl` |          | 需要自行安装 `youtube-dl`。                                                    |
 | YouTube（通过 `yt-dlp`)     | `ytdlp`     | ✅       | 需要自行安装 `yt-dlp`（`youtube-dl` 仍在活跃维护的 fork）。                    |
-| B 站音乐                    | `bilibili`  | ✅       |                                                                                |
+| B 站音乐                    | `bilibili`  |          |                                                                                |
+| B 站音乐                    | `bilivideo` |          | 在大陆地区外的IP地址可能查询不到某些版权视频（如索尼音乐上传的MV等）           |
 | 第三方网易云 API            | `pyncmd`    |          |                                                                                |
 
--   支持 `pyncmd` 的 API 服务由 GD studio <https://music.gdstudio.xyz> 提供。
+- 支持 `pyncmd` 的 API 服务由 GD studio <https://music.gdstudio.xyz> 提供。
 
 ### 环境变量
 
@@ -211,9 +213,9 @@ node app.js -o bilibili ytdlp
 
 这些是常用的值：
 
--   `debug`: 输出所有记录（调试用）
--   `info`: 只输出一般资讯（默认值）
--   `error`: 只在出严重问题时输出
+- `debug`: 输出所有记录（调试用）
+- `info`: 只输出一般资讯（默认值）
+- `error`: 只在出严重问题时输出
 
 详细请参见 [Pino 对此的说明](https://github.com/pinojs/pino/blob/master/docs/api.md#level-string)。
 
@@ -241,6 +243,7 @@ checknetisolation loopbackexempt -a -n="1F8B0F94.122165AE053F_j2p0p5q0044a6"
 <Server IP> music.163.com
 <Server IP> interface.music.163.com
 <Server IP> interface3.music.163.com
+<Server IP> interfacepc.music.163.com
 <Server IP> interface.music.163.com.163jiasu.com
 <Server IP> interface3.music.163.com.163jiasu.com
 ```

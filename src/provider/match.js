@@ -21,7 +21,10 @@ const logger = logScope('provider/match');
 const isHttpResponseOk = (code) => code >= 200 && code <= 299;
 
 /** @type {Map<string, string>} */
-const headerReferer = new Map([['bilivideo.com', 'https://www.bilibili.com/']]);
+const headerReferer = new Map([
+	['bilivideo.com', 'https://www.bilibili.com/'],
+	['upos-hz-mirrorakam.akamaized.net', 'https://www.bilibili.com/'],
+]);
 
 /**
  * @typedef {{ size: number, br: number | null, url: string | null, md5: string | null, source: string }} AudioData

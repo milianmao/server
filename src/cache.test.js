@@ -55,7 +55,7 @@ describe('CacheStorage', () => {
 			const cs = new CacheStorage();
 
 			cs.on(CacheStorageEvents.CLEANUP, () => {
-				expect(cs.removeExpiredCache).toBeCalledTimes(1);
+				expect(cs.removeExpiredCache).toHaveBeenCalledTimes(1);
 				done();
 			});
 			cs.removeExpiredCache = jest.fn();
@@ -73,7 +73,7 @@ describe('CacheStorage', () => {
 
 			await cs.cache('owo', mockFunc);
 
-			expect(mockFunc).toBeCalledTimes(1);
+			expect(mockFunc).toHaveBeenCalledTimes(1);
 			expect(cs.cacheMap.size).toBe(1);
 			expect(cs.cacheMap.get('owo')).toBeDefined();
 			expect(cs.cacheMap.get('owo').data).toBe('12345');
@@ -87,7 +87,7 @@ describe('CacheStorage', () => {
 
 			for (let i = 0; i < 5; i++) await cs.cache('owo', mockFunc);
 
-			expect(mockFunc).toBeCalledTimes(1);
+			expect(mockFunc).toHaveBeenCalledTimes(1);
 			expect(cs.cacheMap.size).toBe(1);
 			expect(cs.cacheMap.get('owo')).toBeDefined();
 			expect(cs.cacheMap.get('owo').data).toBe('12345');
@@ -116,7 +116,7 @@ describe('CacheStorage', () => {
 				.mockReturnValue(Promise.resolve().then(() => '12345'));
 
 			cs.on(CacheStorageEvents.CLEANUP, () => {
-				expect(cs.removeExpiredCache).toBeCalledTimes(1);
+				expect(cs.removeExpiredCache).toHaveBeenCalledTimes(1);
 				done();
 			});
 			cs.removeExpiredCache = jest.fn();
@@ -148,7 +148,7 @@ describe('CacheStorageGroup', () => {
 			instance.cacheStorages.add(cs);
 			instance.cleanup();
 
-			expect(cs.removeExpiredCache).toBeCalledTimes(1);
+			expect(cs.removeExpiredCache).toHaveBeenCalledTimes(1);
 		});
 	});
 });
