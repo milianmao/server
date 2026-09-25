@@ -106,7 +106,8 @@ hook.target.path = new Set([
 	'/api/music-vip-membership/client/vip/info',
 	'/api/search/pc/complex/page',
 	'/api/search/song/list/page',
-	'/api/song/enhance/player/url/v1'
+	'/api/song/enhance/player/url/v1',
+	'/api/song/lyric/v1'
 ]);
 
 const domainList = [
@@ -441,6 +442,8 @@ hook.request.after = (ctx) => {
 				} else if (netease.path.includes('url')) return tryMatch(ctx);
 				else if (netease.path.includes('/usertool/sound/'))
 					return unblockSoundEffects(netease.jsonBody);
+				else if (netease.path.includes('/song/lyric/v1'))
+					return tryMatchLyric(ctx)
 				else if (netease.path.includes('batch')) {
 					for (const key in netease.jsonBody) {
 						if (key.includes('/usertool/sound/'))
@@ -686,6 +689,13 @@ const tryLike = (ctx) => {
 
 const computeHash = (task) =>
 	request('GET', task.url).then((response) => crypto.md5.pipe(response));
+
+const tryMatchLyric = (ctx) => {
+	const { req, netease } = ctx;
+	const { jsonBody } = netease;
+
+}
+
 
 const tryMatch = (ctx) => {
 	const { req, netease } = ctx;
