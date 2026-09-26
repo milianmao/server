@@ -1,0 +1,23 @@
+{
+	"enabled": [
+		"kuwo",
+		"bodian",
+		"kugou"
+	],
+	"order": [
+		"kuwo",
+		"bodian",
+		"kugou",
+		"migu",
+		"joox",
+		"qq",
+		"pyncmd",
+		"bilibili",
+		"bilivideo",
+		"yt-dlp",
+		"youtube"
+	],
+	"enableFlac": false,
+	"perSourceLimit": 10,
+	"requestTimeoutMs": 8000
+}

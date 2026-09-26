@@ -65,7 +65,7 @@ const search = (info) => {
 		});
 };
 
-const SOURCE = 'kwplayercar_ar_6.0.0.9_B_jiakong_vh.apk';
+const SOURCE = 'kwplayer_ar_6.4.1.1_B_jiakong_vh.apk';
 const USER = '52f5601c9390ed0c';
 // 加密格式 (mflac / mgg) 客户端解不开，必须回退到 mp3
 const ENCRYPTED_FORMATS = ['mflac', 'mgg'];

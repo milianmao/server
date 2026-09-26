@@ -10,8 +10,8 @@
 		"node": ">= 12"
 	},
 	"scripts": {
-		"start:dev": "cross-env LOG_LEVEL=debug ENABLE_LOCAL_VIP=svip NO_CACHE=true node src/app.js -e https://music.163.com -o kuwo",
-		"start": "cross-env ENABLE_FLAC=true LOG_LEVEL=debug JSON_LOG=true ENABLE_LOCAL_VIP=svip NO_CACHE=true DISABLE_UPGRADE_CHECK=true BLOCK_ADS=true node src/app.js -e https://music.163.com -o kuwo pyncmd kugou",
+		"start:dev": "node .yarn/releases/yarn-3.8.7.cjs cross-env LOG_LEVEL=debug ENABLE_LOCAL_VIP=svip NO_CACHE=true node src/app.js -e https://music.163.com -o kuwo",
+		"start": "node .yarn/releases/yarn-3.8.7.cjs cross-env ENABLE_FLAC=true LOG_LEVEL=debug JSON_LOG=true ENABLE_LOCAL_VIP=svip NO_CACHE=true DISABLE_UPGRADE_CHECK=true BLOCK_ADS=true node src/app.js -e https://music.163.com -o kuwo pyncmd kugou",
 		"build": "webpack",
 		"pkg": "pkg . --out-path=dist/",
 		"test": "jest",

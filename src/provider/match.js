@@ -10,6 +10,7 @@ const RequestFailed = require('../exceptions/RequestFailed');
 const IncompleteAudioData = require('../exceptions/IncompleteAudioData');
 const { logScope } = require('../logger');
 const RequestCancelled = require('../exceptions/RequestCancelled');
+const { CancelRequest } = require('../cancel');
 
 const logger = logScope('provider/match');
 
@@ -26,6 +27,16 @@ const headerReferer = new Map([
 	['upos-hz-mirrorakam.akamaized.net', 'https://www.bilibili.com/'],
 ]);
 
+// 从 B 站播放地址里读码率：`bw=<bits/s>`
+const bitrateFromUrl = (url) => {
+	try {
+		const bandwidth = Number(new URL(url).searchParams.get('bw'));
+		return Number.isFinite(bandwidth) && bandwidth > 0 ? bandwidth : null;
+	} catch (error) {
+		return null;
+	}
+};
+
 /**
  * @typedef {{ size: number, br: number | null, url: string | null, md5: string | null, source: string }} AudioData
  */
@@ -35,16 +46,18 @@ const headerReferer = new Map([
  *
  * @param {string} source The source to fetch the audio URL.
  * @param {Record<string, unknown>} info The music metadata from Netease Music.
+ * @param {CancelRequest?} cancelRequest The token used to stop the requests
+ *        when another source has already won.
  * @return {Promise<AudioData>}
  */
-async function getAudioFromSource(source, info) {
+async function getAudioFromSource(source, info, cancelRequest) {
 	logger.debug({ source, info }, 'Getting the audio...');
 	// Check if this song is available in the specified source.
-	const audioData = await providers[source].check(info);
+	const audioData = await providers[source].check(info, cancelRequest);
 	if (!audioData) throw new SongNotAvailable(source);
 
 	// Get the url from the song data.
-	const song = await check(audioData);
+	const song = await check(audioData, cancelRequest);
 	logger.debug(song, 'The matched song is:');
 	if (!song || typeof song.url !== 'string')
 		throw new IncompleteAudioData(
@@ -59,9 +72,11 @@ async function getAudioFromSource(source, info) {
 }
 
 async function match(id, source, data) {
-	const candidate = (source || global.source || defaultSrc).filter(
-		(name) => name in providers
-	);
+	const candidate = (source || global.source || defaultSrc).filter((name) => {
+		const known = name in providers;
+		if (!known) logger.warn({ source: name }, 'Unknown source, ignored.');
+		return known;
+	});
 
 	const audioInfo = await find(id, data);
 	let audioData = null;
@@ -104,20 +119,31 @@ async function match(id, source, data) {
 		}
 
 		if (!audioData) {
-			throw 'No audioData!';
+			// 与 SELECT_MAX_BR 分支保持一致：抛异常对象，而不是字符串
+			throw new SongNotAvailable('any source');
 		}
 	} else {
-		audioData = await Promise.any(
-			candidate.map(async (source) =>
-				getAudioFromSource(source, audioInfo).catch((e) => {
-					if (e) {
-						if (e instanceof RequestCancelled) logger.debug(e);
-						else logger.error(e);
-					}
-					throw e; // We just log it instead of resolving it.
-				})
-			)
-		);
+		// 多音源同时查询，谁先出结果用谁；其余音源一旦有胜出者就立刻中止，
+		// 否则它们会继续跑完搜索 / 探测等请求（实测一次 match 会多出 3~6 个请求）。
+		const cancelRequest = new CancelRequest();
+		try {
+			audioData = await Promise.any(
+				candidate.map(async (source) =>
+					getAudioFromSource(source, audioInfo, cancelRequest).catch(
+						(e) => {
+							if (e) {
+								if (e instanceof RequestCancelled)
+									logger.debug(e);
+								else logger.error(e);
+							}
+							throw e; // We just log it instead of resolving it.
+						}
+					)
+				)
+			);
+		} finally {
+			cancelRequest.cancel();
+		}
 	}
 
 	const { id: audioId, name } = audioInfo;
@@ -137,9 +163,10 @@ async function match(id, source, data) {
 /**
  * Check and get the audio info of URL.
  * @param url The URL to be fetched.
- * @return {Promise<AudioData>} The parsed audio data.
+ * @param cancelRequest The token used to stop the request.
+ * @return {Promise<AudioData>}
  */
-async function check(url) {
+async function check(url, cancelRequest) {
 	const isHost = isHostWrapper(url);
 	const song = { size: 0, br: null, url: null, md5: null };
 	const header = {
@@ -152,7 +179,14 @@ async function check(url) {
 		if (isHost(urlPattern)) header.referer = refererValue;
 	});
 
-	const response = await request('GET', url, header);
+	const response = await request(
+		'GET',
+		url,
+		header,
+		undefined,
+		undefined,
+		cancelRequest
+	);
 	const {
 		/** @type {Record<string, string>} */
 		headers,
@@ -194,6 +228,13 @@ async function check(url) {
 			}
 
 			song.br = bitrate;
+		}
+
+		// B 站的音频是 fMP4（m4s），从字节里解析不出码率，
+		// 但播放地址自带 `bw=<bits/s>`（含 P2P / 镜像节点）。
+		if (isHost('upgcxcode')) {
+			const bandwidth = bitrateFromUrl(song.url);
+			if (bandwidth) song.br = bandwidth;
 		}
 
 		if (isHost('googlevideo.com')) {
