@@ -132,9 +132,15 @@ const proxy = {
 					req.headers['user-agent'] = 'okhttp/3.4.1';
 				}
 				const url = parse(req.url);
-				const options = request.configure(req.method, url, req.headers);
+				// ctx.proxy 由 hook 针对 /package/ 音频回源按音源规则设置，其余请求为 undefined
+				const options = request.configure(
+					req.method,
+					url,
+					req.headers,
+					ctx.proxy
+				);
 				ctx.proxyReq = request
-					.create(url)(options)
+					.create(url, ctx.proxy)(options)
 					.on('response', (proxyRes) =>
 						resolve((ctx.proxyRes = proxyRes))
 					)
@@ -162,14 +168,18 @@ const proxy = {
 					return reject((ctx.error = ctx.decision));
 				const { req } = ctx;
 				const url = parse('https://' + req.url);
-				if (global.proxy && !req.local) {
+				// 优先用 hook 指定的按音源代理（ctx.proxy），否则退回全局上游代理
+				const upstream =
+					ctx.proxy || (global.proxy && !req.local ? global.proxy : null);
+				if (upstream) {
 					const options = request.configure(
 						req.method,
 						url,
-						req.headers
+						req.headers,
+						upstream
 					);
 					request
-						.create(proxy)(options)
+						.create(upstream)(options)
 						.on('connect', (_, proxySocket) =>
 							resolve((ctx.proxySocket = proxySocket))
 						)

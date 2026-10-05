@@ -2,6 +2,7 @@ const parse = require('url').parse;
 const crypto = require('./crypto');
 const request = require('./request');
 const match = require('./provider/match');
+const egress = require('./egress');
 const querystring = require('querystring');
 const { isHost, cookieToMap, mapToCookie } = require('./utilities');
 const { getManagedCacheStorage } = require('./cache');
@@ -308,6 +309,12 @@ hook.request.before = (ctx) => {
 			req.headers['cookie'] = null;
 			ctx.package = { id };
 			ctx.decision = 'proxy';
+			// 音频回源也走该音源的出口代理（与 provider 解析同一个池）；
+			// 设 KUWO_AUDIO_DIRECT=true 可让音频保持直连（省代理流量）。
+			ctx.proxy =
+				process.env.KUWO_AUDIO_DIRECT === 'true'
+					? undefined
+					: egress.proxyForUrl(url.href);
 			// if (url.href.includes('google'))
 			// 	return request('GET', req.url, req.headers, null, parse('http://127.0.0.1:1080'))
 			// 	.then(response => (ctx.res.writeHead(response.statusCode, response.headers), response.pipe(ctx.res)))
@@ -728,7 +735,16 @@ const tryMatch = (ctx) => {
 						os = header.os || cookie.os;
 					} catch (e) {}
 					item.type = song.br === 999000 ? 'flac' : 'mp3';
-					if (os === 'pc' || os === 'uwp') {
+					// 2026-10-01 patch: 网易自家 CDN 直链直发给客户端，避免音频绕服务器中转
+					// （客户端在国内直连 music.126.net 比经美国服务器中转快得多；DIRECT_CDN=false 可关闭）
+					const directCdn =
+						process.env.DIRECT_CDN !== 'false' &&
+						/^https?:\/\/[\w.-]*music\.126\.net\//.test(song.url || '')
+							? song.url
+							: null;
+					if (directCdn) {
+						item.url = directCdn;
+					} else if (os === 'pc' || os === 'uwp') {
 						item.url = global.endpoint
 							? `${global.endpoint.replace(
 									'https://',

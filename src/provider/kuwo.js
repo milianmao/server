@@ -3,6 +3,12 @@ const select = require('./select');
 const crypto = require('../crypto');
 const request = require('../request');
 const { getManagedCacheStorage } = require('../cache');
+const egress = require('../egress');
+
+// kuwo 专属出口代理，域名规则见 src/egress.js（其它音源不受影响）。
+// KUWO_PROXY 指向 proxy-panel 的「池端口」而不是单个节点：账号级用户名（不带 -node-xx）
+// 让池策略生效，节点刷新/下线由面板健康检查兜底。
+const proxy = egress.proxyByEnv('KUWO_PROXY');
 
 const format = (song) => ({
 	id: song.MUSICRID.split('_').pop(),
@@ -47,7 +53,7 @@ const search = (info) => {
 		'&all=' +
 		keyword +
 		'&correct=1&uid=2796182286&loginid=0&ver=kwplayer_ar_11.3.2.0&stype=comprehensive&cluster=0&strategy=2012&encoding=utf8&rformat=json&vermerge=1&mobi=1&show_copyright_off=1&issubtitle=1&isshowshortv=1&searchapi=9&province=&city=&userIP=223.160.230.105&searchNo=2796182286%E5%87%A0%E5%88%86%E4%B9%8B%E5%87%A01765260152538&spPrivilege=0&jfencv=user%2Candroid_id%2Coaid';
-	return request('GET', url)
+	return request('GET', url, undefined, null, proxy)
 		.then((response) => response.json())
 		.then((jsonBody) => {
 			const musicpage =
@@ -82,7 +88,9 @@ const convert = (id, br) =>
 			'&user=' +
 			USER +
 			'&loginUid=0',
-		{ 'user-agent': 'okhttp/3.10.0' }
+		{ 'user-agent': 'okhttp/3.10.0' },
+		null,
+		proxy
 	)
 		.then((response) => response.json())
 		.then((jsonBody) => {

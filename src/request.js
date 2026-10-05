@@ -10,6 +10,20 @@ const format = require('url').format;
 const logger = logScope('request');
 const timeoutThreshold = 10 * 1000;
 const translate = (host) => (global.hosts || {})[host] || host;
+// http://user:pass@host 的 auth 字段 -> Basic 凭据（逐段 decode，避免密码含 % 时抛错）
+const proxyAuth = (auth) =>
+	Buffer.from(
+		auth
+			.split(':')
+			.map((part) => {
+				try {
+					return decodeURIComponent(part);
+				} catch (_) {
+					return part;
+				}
+			})
+			.join(':')
+	).toString('base64');
 const create = (url, proxy) =>
 	(((typeof proxy === 'undefined' ? global.proxy : proxy) || url).protocol ===
 	'https:'
@@ -48,6 +62,14 @@ const configure = (method, url, headers, proxy) => {
 			url.protocol === 'https:'
 				? translate(url.hostname) + ':' + (url.port || 443)
 				: 'http://' + translate(url.hostname) + url.path;
+		// 支持带认证的上游代理（http://user:pass@host:port）：补 Proxy-Authorization。
+		// 原实现只取 proxy.hostname / proxy.port，proxy.auth 会被静默丢弃，
+		// 导致 407 认证代理完全不可用（含 HTTPS 的 CONNECT 分支）。
+		if (proxy.auth) {
+			options.headers = Object.assign({}, options.headers, {
+				'proxy-authorization': 'Basic ' + proxyAuth(proxy.auth),
+			});
+		}
 	} else {
 		options.hostname = translate(url.hostname);
 		options.port = url.port || (url.protocol === 'https:' ? 443 : 80);
